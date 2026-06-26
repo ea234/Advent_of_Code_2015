@@ -3,7 +3,9 @@ package de.ea234.aoc2015.day08;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <pre>
@@ -14,18 +16,58 @@ import java.util.List;
  * https://www.reddit.com/r/adventofcode/comments/3vw32y/day_8_solutions/
  * 
  * 
- * length_memory    2   length_code    0  =     2 
- * length_memory    5   length_code    3  =     2 
- * length_memory   10   length_code    7  =     3 
- * length_memory    6   length_code    1  =     5
- *  
- * counter_quotation_marks 8   counter_white_space 0
- * length_memory   23   length_code   11  =    12
- *  
- * counter_quotation_marks 600   counter_white_space 300
- * length_memory 6610   length_code 5277  =  1333 
- *  
- *  
+ * Part 1: length_memory    2   length_code    0  =     2   "" 
+ * Part 1: length_memory    5   length_code    3  =     2   "abc" 
+ * Part 1: length_memory   10   length_code    7  =     3   "aaa\"aaa" 
+ * Part 1: length_memory    6   length_code    1  =     5   "\x27" 
+ * Part 1: length_memory   23   length_code   11  =    12 
+ * 
+ * 
+ * 
+ * Part 2: length old string    2   length new string    6  =     4   "" 
+ * Part 2: length old string    5   length new string    9  =     4   "abc" 
+ * Part 2: length old string   10   length new string   16  =     6   "aaa\"aaa" 
+ * Part 2: length old string    6   length new string   11  =     5   "\x27" 
+ * Part 2: length old string   23   length new string   42  =    19  
+ * 
+ * Result Part 1 12
+ * Result Part 2 19
+ * 
+ * 
+ * ------------------------------------------------------------------------------------------------
+ * 
+ * 
+ * Part 1: length_memory   38   length_code   29  =     9   "sjdivfriyaaqa\xd2v\"k\"mpcu\"yyu\"en" 
+ * Part 1: length_memory    6   length_code    4  =     2   "vcqc" 
+ * Part 1: length_memory   27   length_code   23  =     4   "zbcwgmbpijcxu\"yins\"sfxn" 
+ * Part 1: length_memory   10   length_code    8  =     2   "yumngprx"
+ * ...
+ * Part 1: length_memory   13   length_code   11  =     2   "dpbntplgmwb" 
+ * Part 1: length_memory   27   length_code   24  =     3   "utsgfkm\\vbftjknlktpthoeo" 
+ * Part 1: length_memory   20   length_code   17  =     3   "ccxjgiocmuhf\"ycnh" 
+ * Part 1: length_memory   13   length_code   10  =     3   "lltj\"kbbxi" 
+ * Part 1: length_memory 6310   length_code 4977  =  1333 
+ * 
+ * 
+ * 
+ * Part 2: length old string   38   length new string   51  =    13   "sjdivfriyaaqa\xd2v\"k\"mpcu\"yyu\"en" 
+ * Part 2: length old string    6   length new string   10  =     4   "vcqc" 
+ * Part 2: length old string   27   length new string   35  =     8   "zbcwgmbpijcxu\"yins\"sfxn" 
+ * Part 2: length old string   10   length new string   14  =     4   "yumngprx"
+ * ...
+ * Part 2: length old string   13   length new string   17  =     4   "dpbntplgmwb" 
+ * Part 2: length old string   27   length new string   33  =     6   "utsgfkm\\vbftjknlktpthoeo" 
+ * Part 2: length old string   20   length new string   26  =     6   "ccxjgiocmuhf\"ycnh" 
+ * Part 2: length old string   13   length new string   19  =     6   "lltj\"kbbxi" 
+ * Part 2: length old string 6310   length new string 8356  =  2046  
+ * 
+ * Result Part 1 1333
+ * Result Part 2 2046
+ * 
+ * 
+ * ------------------------------------------------------------------------------------------------
+ * 
+ * 
  * ea234@MsiZ370:/mnt/hd4tbb/daten/zdownload$ head -n 20 advent_of_code_2015__day08_input.txt 
  * "sjdivfriyaaqa\xd2v\"k\"mpcu\"yyu\"en"
  * "vcqc"
@@ -72,48 +114,75 @@ public class Day08_Matchsticks
 {
   public static void main( String[] args )
   {
-//    calculatePart01( "\"\"" ); // 0
-//    calculatePart01( "\"abc\"" ); // 3
-//    calculatePart01( "\"aaa\\\"aaa\"" ); // 7
-//    calculatePart01( "\"aaa\\\"aaa\"" ); // 7
-//    calculatePart01( "\"\\x27\"" ); // 1
-//
-    String test_x = "\"\"" + "\n" + "\"abc\"" + "\n" + "\"aaa\\\"aaa\"" + "\n" + "\"\\x27\"";
+    String test_x = "\"\",\"abc\",\"aaa\\\"aaa\",\"\\x27\"";
 
-    calculate01( test_x.getBytes(), true );
+    calculatePart01( test_x, true );
 
     calculate01( getListProd(), true );
 
     System.exit( 0 );
   }
 
-  private static void calculatePart01( String pString )
+  private static void calculatePart01( String pString, boolean pKnzDebug )
   {
-    calculate01( pString.getBytes(), false );
+    List< String > converted_string_list = Arrays.stream( pString.split( "," ) ).map( String::trim ).collect( Collectors.toList() );
+
+    calculate01( converted_string_list, pKnzDebug );
   }
 
-  private static void calculate01( byte[] pBytes, boolean pKnzDebug )
+  private static void calculate01( List< String > pListInput, boolean pKnzDebug )
   {
-    long length_memory = getMemoryLength( pBytes, pKnzDebug );
+    long length_memory_sum = 0;
 
-    long length_code = pBytes.length;
+    long length_code_sum = 0;
 
-    long result_part_01 = length_code - length_memory;
+    for ( String input_str : pListInput )
+    {
+      if ( !input_str.isBlank() )
+      {
+        long length_memory = getMemoryLength( input_str, false );
 
-    //wl( String.format( "Part 1: length_memory %4d   length_code %4d  =  %4d ", length_code, length_memory, result_part_01 ) );
+        length_memory_sum += length_memory;
 
-    String new_string = getEscapedString( pBytes );
+        length_code_sum += input_str.length();
 
-    long length_memory_c2 = getMemoryLength( new_string.getBytes(), pKnzDebug );
+        wl( String.format( "Part 1: length_memory %4d   length_code %4d  =  %4d   %s ", input_str.length(), length_memory, ( input_str.length() - length_memory ), input_str ) );
+      }
+    }
 
-    long length_new_string = new_string.length();
+    long result_part_01 = length_code_sum - length_memory_sum;
 
-    long result_part_02 = length_new_string - length_code;
+    wl( String.format( "Part 1: length_memory %4d   length_code %4d  =  %4d ", length_code_sum, length_memory_sum, result_part_01 ) );
 
-    wl( String.format( "Part 2: length_code %4d   new_string_code   %4d   length_memory_c2 %4d  =  %4d ", length_code, length_new_string, length_memory_c2, result_part_02 ) );
+    wl( "" );
+    wl( "" );
+    wl( "" );
+
+    long length_code_sum_new = 0;
+
+    for ( String input_str : pListInput )
+    {
+      if ( !input_str.isBlank() )
+      {
+        String new_string = getEscapedString( input_str );
+
+        length_code_sum_new += new_string.length();
+
+        wl( String.format( "Part 2: length old string %4d   length new string %4d  =  %4d   %s ", input_str.length(), new_string.length(), ( new_string.length() - input_str.length() ), input_str ) );
+      }
+    }
+
+    long result_part_02 = length_code_sum_new - length_code_sum;
+
+    wl( String.format( "Part 2: length old string %4d   length new string %4d  =  %4d  ", length_code_sum, length_code_sum_new, result_part_02 ) );
+
+    wl( "" );
+    wl( "Result Part 1 " + result_part_01 );
+    wl( "Result Part 2 " + result_part_02 );
+    wl( "" );
   }
 
-  public static int getMemoryLength( byte[] pBytes, boolean pKnzDebug )
+  private static int getMemoryLength( String pBytes, boolean pKnzDebug )
   {
     int memory_length = 0;
 
@@ -121,9 +190,9 @@ public class Day08_Matchsticks
 
     int counter_white_space = 0;
 
-    for ( int cur_index = 0; cur_index < pBytes.length; cur_index++ )
+    for ( int cur_index = 0; cur_index < pBytes.length(); cur_index++ )
     {
-      byte cur_char = pBytes[ cur_index ];
+      char cur_char = pBytes.charAt( cur_index );
 
       if ( cur_char == '"' )
       {
@@ -135,7 +204,7 @@ public class Day08_Matchsticks
       }
       else if ( cur_char == '\\' )
       {
-        byte next_char = pBytes[ cur_index + 1 ];
+        char next_char = pBytes.charAt( cur_index + 1 );
 
         memory_length++;
 
@@ -150,7 +219,6 @@ public class Day08_Matchsticks
         }
         else if ( next_char == 'x' )
         {
-
           /*
            * 3 more characters: x + 2 Hex Numbers
            */
@@ -165,21 +233,21 @@ public class Day08_Matchsticks
 
     if ( pKnzDebug )
     {
-      wl( "counter_quotation_marks " + counter_quotation_marks + "   counter_white_space " + counter_white_space );
+      wl( "counter_quotation_marks " + counter_quotation_marks + "   counter_white_space " + counter_white_space + "   memory_length " + memory_length );
     }
 
     return memory_length + counter_white_space;
   }
 
-  public static String getEscapedString( byte[] pBytes )
+  private static String getEscapedString( String pBytes )
   {
     StringBuilder new_string = new StringBuilder();
 
     new_string.append( "\"" );
 
-    for ( int cur_index = 0; cur_index < pBytes.length; cur_index++ )
+    for ( int cur_index = 0; cur_index < pBytes.length(); cur_index++ )
     {
-      byte cur_char = pBytes[ cur_index ];
+      char cur_char = pBytes.charAt( cur_index );
 
       if ( cur_char == '"' )
       {
@@ -195,7 +263,7 @@ public class Day08_Matchsticks
       }
       else if ( cur_char == '\\' )
       {
-        byte next_char = pBytes[ cur_index + 1 ];
+        char next_char = pBytes.charAt( cur_index + 1 );
 
         new_string.append( "\\\\" );
 
@@ -217,9 +285,9 @@ public class Day08_Matchsticks
         {
           new_string.append( ( (char) next_char ) );
 
-          new_string.append( ( (char) pBytes[ cur_index + 2 ] ) );
+          new_string.append( pBytes.charAt( cur_index + 2 ) );
 
-          new_string.append( ( (char) pBytes[ cur_index + 3 ] ) );
+          new_string.append( pBytes.charAt( cur_index + 3 ) );
 
           /*
            * 3 more characters: x + 2 Hex Numbers
@@ -238,13 +306,11 @@ public class Day08_Matchsticks
     return new_string.toString();
   }
 
-
   private static List< String > getListProd()
   {
     List< String > string_array = null;
 
-//    String datei_input = "/mnt/hd4tbb/daten/zdownload/advent_of_code_2015__day07_input.txt";
-    String datei_input = "/mnt/hd4tbb/daten/zdownload/input";
+    String datei_input = "/mnt/hd4tbb/daten/zdownload/advent_of_code_2015__day08_input.txt";
 
     try
     {
@@ -257,7 +323,7 @@ public class Day08_Matchsticks
 
     return string_array;
   }
-  
+
   private static void wl( String pString ) // wl = short for "write log"
   {
     System.out.println( pString );
