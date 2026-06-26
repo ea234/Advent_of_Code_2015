@@ -125,16 +125,17 @@ import java.util.List;
  * 
  * 
  * Result Part 1 768
- * Result Part 2 0
+ * Result Part 2 781
  * 
  * </pre>
  */
 public class Day18_LikeAGifForYourYard
 {
-
   private static final int  SET_0          = 0;
 
   private static final int  SET_1          = 1;
+
+  private static final int  SET_2          = 2;
 
   private static final int  LIGHT_ON       = 1;
 
@@ -157,7 +158,7 @@ public class Day18_LikeAGifForYourYard
 
     long result_part_02 = 0;
 
-    long[][][] grid = new long[ 2 ][ 101 ][ 101 ];
+    long[][][] grid = new long[ 3 ][ 101 ][ 101 ];
 
     /*
      * ********************************************************************************************
@@ -168,9 +169,6 @@ public class Day18_LikeAGifForYourYard
     setLightStatus( grid, SET_0, 0, 0, 100, 100, LIGHT_OFF );
     setLightStatus( grid, SET_1, 0, 0, 100, 100, LIGHT_OFF );
 
-    int set_write = SET_0;
-    int set_read  = SET_1;
-
     int cur_row = 0;
 
     for ( String input_str : pListInput )
@@ -179,7 +177,8 @@ public class Day18_LikeAGifForYourYard
       {
         for ( int cur_col = 0; cur_col < input_str.length(); cur_col++ )
         {
-          grid[ set_write ][ cur_row ][ cur_col ] = input_str.charAt( cur_col ) == CHAR_LIGHT_ON ? LIGHT_ON : LIGHT_OFF;
+          grid[ SET_1 ][ cur_row ][ cur_col ] = input_str.charAt( cur_col ) == CHAR_LIGHT_ON ? LIGHT_ON : LIGHT_OFF;
+          grid[ SET_2 ][ cur_row ][ cur_col ] = input_str.charAt( cur_col ) == CHAR_LIGHT_ON ? LIGHT_ON : LIGHT_OFF;
         }
 
         cur_row++;
@@ -188,9 +187,12 @@ public class Day18_LikeAGifForYourYard
 
     /*
      * ********************************************************************************************
-     * Doing the animations
+     * Doing the animations Part 1
      * ********************************************************************************************
      */
+
+    int set_write = SET_1;
+    int set_read  = SET_0;
 
     for ( int cur_col = 0; cur_col < 100; cur_col++ )
     {
@@ -212,11 +214,53 @@ public class Day18_LikeAGifForYourYard
 
     result_part_01 = countLightStatus( grid, set_write, 0, 0, 99, 99, LIGHT_ON );
 
+    /*
+     * ********************************************************************************************
+     * Doing the animations Part 2
+     * ********************************************************************************************
+     */
+
+    set_write = SET_1;
+    set_read  = SET_0;
+
+    for ( int cur_col = 0; cur_col < 100; cur_col++ )
+    {
+      if ( set_read == SET_0 )
+      {
+        set_read = SET_2;
+
+        set_write = SET_0;
+      }
+      else
+      {
+        set_read  = SET_0;
+
+        set_write = SET_2;
+      }
+
+      setCornerLightsOn( grid, set_read, 0, 0, 99, 99 );
+
+      doAnimationPart01( grid, set_read, set_write, 0, 0, 99, 99 );
+    }
+
+    setCornerLightsOn( grid, set_write, 0, 0, 99, 99 );
+
+    result_part_02 = countLightStatus( grid, set_write, 0, 0, 99, 99, LIGHT_ON );
+
     wl( getDebugLightStatus( grid, set_write, 0, 0, 99, 99 ) );
+
     wl( "" );
     wl( "Result Part 1 " + result_part_01 );
     wl( "Result Part 2 " + result_part_02 );
     wl( "" );
+  }
+
+  private static void setCornerLightsOn( long[][][] grid, int pSet, int pRowStart, int pColStart, int pRowEnd, int pColEnd )
+  {
+    grid[ pSet ][ pRowStart ][ pColStart ] = LIGHT_ON;
+    grid[ pSet ][ pRowStart ][ pColEnd   ] = LIGHT_ON;
+    grid[ pSet ][ pRowEnd   ][ pColStart ] = LIGHT_ON;
+    grid[ pSet ][ pRowEnd   ][ pColEnd   ] = LIGHT_ON;
   }
 
   private static void doAnimationPart01( long[][][] grid, int pSetRead, int pSetWrite, int pRowStart, int pColStart, int pRowEnd, int pColEnd )
@@ -235,14 +279,14 @@ public class Day18_LikeAGifForYourYard
     int neighbour_count = 0;
 
     neighbour_count += getState( grid, pSet, pRow - 1, pCol - 1, pStatus );
-    neighbour_count += getState( grid, pSet, pRow - 1, pCol, pStatus );
+    neighbour_count += getState( grid, pSet, pRow - 1, pCol,     pStatus );
     neighbour_count += getState( grid, pSet, pRow - 1, pCol + 1, pStatus );
 
-    neighbour_count += getState( grid, pSet, pRow, pCol - 1, pStatus );
-    neighbour_count += getState( grid, pSet, pRow, pCol + 1, pStatus );
+    neighbour_count += getState( grid, pSet, pRow,     pCol - 1, pStatus );
+    neighbour_count += getState( grid, pSet, pRow,     pCol + 1, pStatus );
 
     neighbour_count += getState( grid, pSet, pRow + 1, pCol - 1, pStatus );
-    neighbour_count += getState( grid, pSet, pRow + 1, pCol, pStatus );
+    neighbour_count += getState( grid, pSet, pRow + 1, pCol,     pStatus );
     neighbour_count += getState( grid, pSet, pRow + 1, pCol + 1, pStatus );
 
     long new_status = LIGHT_OFF;
