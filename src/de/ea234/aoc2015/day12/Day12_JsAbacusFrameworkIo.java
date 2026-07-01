@@ -26,12 +26,13 @@ public class Day12_JsAbacusFrameworkIo
 
   public static void main( String[] args )
   {
-    calculate01( "[1,{\"c\":\"red\",\"b\":2},3"            );
-    calculate01( "{\"d\":\"red\",\"e\":[1,2,3,4],\"f\":5}" );
-    calculate01( "[1,\"red\",5]"                           );
-    calculate01( getListProd()                             );
 
-    //calculate01( getListProd().substring( 0, 1350 ), true );
+//    calculate01( "[1,{\"c\":\"red\",\"b\":2},3" );
+//    calculate01( "{\"d\":\"red\",\"e\":[1,2,3,4],\"f\":5}" );
+//    calculate01( "[1,\"red\",5]" );
+    calculate01( getListProd() );
+
+    //calculate01( getListProd().substring( 0, 5250 ) );
 
     System.exit( 0 );
   }
@@ -44,15 +45,15 @@ public class Day12_JsAbacusFrameworkIo
 
     parser_index = 0;
 
-    knz_do_red_check = true;
+    knz_do_red_check = false;
 
-    long result_part_02 = parseNumbers( pListInput + "}" );
+    long result_part_03 = parseNumbersVersion2( pListInput + "}" );
 
     parser_index = 0;
 
-    knz_do_red_check = false;
+    knz_do_red_check = true;
 
-    long result_part_03 = parseNumbers( pListInput + "}" );
+    long result_part_02 = parseNumbersVersion2( pListInput + "}" );
 
     wl( "" );
     wl( "Result Part 1 " + result_part_01 );
@@ -95,19 +96,21 @@ public class Day12_JsAbacusFrameworkIo
    * Result Check  156366
    * 
    * Result Part 2 91444
+   * 
+   * 
    */
 
-  private static long parseNumbers( String pJson )
+  private static long parseNumbersVersion2( String pJson )
   {
     long result_cur_json_element = 0;
 
-    long cur_number              = 0;
+    long cur_number = 0;
 
-    long negative_flag           = 1;
+    long negative_flag = 1;
 
-    boolean knz_red_found        = false;
+    boolean knz_red_found = false;
 
-    boolean knz_in_array         = false;
+    boolean knz_in_array = false;
 
     while ( parser_index < pJson.length() )
     {
@@ -120,6 +123,8 @@ public class Day12_JsAbacusFrameworkIo
          */
 
         cur_number = ( cur_number * 10 ) + ( cur_char - '0' );
+
+        parser_index++;
       }
       else if ( ( cur_char == '-' ) && ( isNegativePreceedingChar( pJson.charAt( parser_index - 1 ) ) ) )
       {
@@ -128,39 +133,40 @@ public class Day12_JsAbacusFrameworkIo
          */
 
         negative_flag = -1;
+
+        parser_index++;
       }
-      else if ( ( cur_char == 'r' ) && ( ( parser_index + 3 ) < pJson.length() ) && ( knz_in_array == false ) )
+      else if ( ( cur_char == 'r' ) && ( ( parser_index + 3 ) < pJson.length() ) && ( knz_in_array == false ) && ( pJson.charAt( parser_index + 1 ) == 'e' ) && ( pJson.charAt( parser_index + 2 ) == 'd' ) && ( pJson.charAt( parser_index + 3 ) == '\"' ) && ( pJson.charAt( parser_index - 1 ) == '\"' ) )
       {
-        /*
-         * If the current char is 'r' 
-         * check for "red"
-         */
-        if ( ( pJson.charAt( parser_index + 1 ) == 'e' ) && ( pJson.charAt( parser_index + 2 ) == 'd' ) && ( pJson.charAt( parser_index + 3 ) == '\"' ) && ( pJson.charAt( parser_index - 1 ) == '\"' ) )
-        {
-          knz_red_found = true;
-        }
+        knz_red_found = true;
+
+        //wl( pJson.substring( parser_index, parser_index + 10 ) + " " + parser_index );
+
+        parser_index += 4;
+
+        //wl( pJson.substring( parser_index, parser_index + 10 ) + " " + parser_index );
       }
       else if ( cur_char == '[' )
       {
         knz_in_array = true;
+
+        parser_index++;
       }
       else if ( cur_char == ']' )
       {
         knz_in_array = false;
+
+        parser_index++;
       }
       else if ( cur_char == '{' )
       {
-        cur_number *= negative_flag;
-
-        result_cur_json_element += cur_number;
-
         cur_number = 0;
 
         negative_flag = 1;
 
         parser_index++;
 
-        result_cur_json_element += parseNumbers( pJson );
+        result_cur_json_element += parseNumbersVersion2( pJson );
       }
       else if ( cur_char == '}' )
       {
@@ -170,12 +176,16 @@ public class Day12_JsAbacusFrameworkIo
 
         parser_index++;
 
-        wl( "B " + cur_number + " " + result_cur_json_element );
-
         if ( ( knz_red_found ) && ( knz_do_red_check ) )
         {
+          wl( String.format( "Index %6d   Element Number Value %10d    #### RED ####", parser_index, 0 ) );
+          wl( "" );
+
           return 0;
         }
+
+        wl( String.format( "Index %6d   Element Number Value %10d", parser_index, result_cur_json_element ) );
+        wl( "" );
 
         return result_cur_json_element;
       }
@@ -183,22 +193,127 @@ public class Day12_JsAbacusFrameworkIo
       {
         cur_number *= negative_flag;
 
+        negative_flag = 1;
+
         result_cur_json_element += cur_number;
+
+        if ( cur_number != 0 )
+        {
+          wl( String.format( "Index %6d   Element Number Value %10d    Cur Number %6d    %s", parser_index, result_cur_json_element, cur_number, ( knz_red_found ? "#### RED ####" : "" ) ) );
+        }
 
         cur_number = 0;
 
-        negative_flag = 1;
-
-        wl( "B " + cur_number + " " + result_cur_json_element );
+        parser_index++;
       }
-
-      parser_index++;
     }
-
-    wl( "B " + cur_number + " " + result_cur_json_element );
 
     return result_cur_json_element;
   }
+
+
+  //private static long parseNumbersVersion1( String pJson )
+  //{
+  //  long result_cur_json_element = 0;
+  //
+  //  long cur_number              = 0;
+  //
+  //  long negative_flag           = 1;
+  //
+  //  boolean knz_red_found        = false;
+  //
+  //  boolean knz_in_array         = false;
+  //
+  //  while ( parser_index < pJson.length() )
+  //  {
+  //    char cur_char = pJson.charAt( parser_index );
+  //
+  //    if ( ( cur_char >= '0' ) && ( cur_char <= '9' ) )
+  //    {
+  //      /*
+  //       * If the current char is a number, add the number up
+  //       */
+  //
+  //      cur_number = ( cur_number * 10 ) + ( cur_char - '0' );
+  //    }
+  //    else if ( ( cur_char == '-' ) && ( isNegativePreceedingChar( pJson.charAt( parser_index - 1 ) ) ) )
+  //    {
+  //      /*
+  //       * Negative character found 
+  //       */
+  //
+  //      negative_flag = -1;
+  //    }
+  //    else if ( ( cur_char == 'r' ) && ( ( parser_index + 3 ) < pJson.length() ) && ( knz_in_array == false ) )
+  //    {
+  //      /*
+  //       * If the current char is 'r' 
+  //       * check for "red"
+  //       */
+  //      if ( ( pJson.charAt( parser_index + 1 ) == 'e' ) && ( pJson.charAt( parser_index + 2 ) == 'd' ) && ( pJson.charAt( parser_index + 3 ) == '\"' ) && ( pJson.charAt( parser_index - 1 ) == '\"' ) )
+  //      {
+  //        knz_red_found = true;
+  //      }
+  //    }
+  //    else if ( cur_char == '[' )
+  //    {
+  //      knz_in_array = true;
+  //    }
+  //    else if ( cur_char == ']' )
+  //    {
+  //      knz_in_array = false;
+  //    }
+  //    else if ( cur_char == '{' )
+  //    {
+  //      cur_number *= negative_flag;
+  //
+  //      result_cur_json_element += cur_number;
+  //
+  //      cur_number = 0;
+  //
+  //      negative_flag = 1;
+  //
+  //      parser_index++;
+  //
+  //      result_cur_json_element += parseNumbersVersion1( pJson );
+  //    }
+  //    else if ( cur_char == '}' )
+  //    {
+  //      cur_number *= negative_flag;
+  //
+  //      result_cur_json_element += cur_number;
+  //
+  //      parser_index++;
+  //
+  //      wl( "B " + cur_number + " " + result_cur_json_element );
+  //
+  //      if ( ( knz_red_found ) && ( knz_do_red_check ) )
+  //      {
+  //        return 0;
+  //      }
+  //
+  //      return result_cur_json_element;
+  //    }
+  //    else
+  //    {
+  //      cur_number *= negative_flag;
+  //
+  //      result_cur_json_element += cur_number;
+  //
+  //      cur_number = 0;
+  //
+  //      negative_flag = 1;
+  //
+  //      wl( "B " + cur_number + " " + result_cur_json_element );
+  //    }
+  //
+  //    parser_index++;
+  //  }
+  //
+  //  wl( "B " + cur_number + " " + result_cur_json_element );
+  //
+  //  return result_cur_json_element;
+  //}
 
   private static long getSumNumbers( String pString )
   {
