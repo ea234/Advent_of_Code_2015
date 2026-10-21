@@ -8,6 +8,8 @@ package de.ea234.aoc2015.day25;
  * 
  * https://www.reddit.com/r/adventofcode/comments/3y5jco/day_25_solutions/
  * 
+ * https://github.com/ea234/Advent_of_Code_2015/blob/main/src/de/ea234/aoc2015/day25/Day25_LetItSnow.java
+ *
  * Round 17769740  -  Row   5962 Col      1  -  Prev   19532620   Cur   19532620
  * Round 17775702  -  Row   5963 Col      1  -  Prev    7926083   Cur    7926083
  * Round 17781665  -  Row   5964 Col      1  -  Prev   15433580   Cur   15433580
