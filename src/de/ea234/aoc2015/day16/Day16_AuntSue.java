@@ -6,8 +6,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -19,23 +17,27 @@ import java.util.stream.Collectors;
  * 
  * https://www.reddit.com/r/adventofcode/comments/3x1i26/day_16_solutions/
  * 
- * 
- * LIST Number 494        | children   -1 | cats   -1 | samoyeds    1 | pomeranians   -1 | akitas   -1 | vizslas   -1 | goldfish   -1 | trees    8 | cars   -1 | perfumes    5 
- * LIST Number 495        | children    9 | cats   -1 | samoyeds   -1 | pomeranians   -1 | akitas    8 | vizslas    4 | goldfish   -1 | trees   -1 | cars   -1 | perfumes   -1 
- * LIST Number 496        | children   -1 | cats   -1 | samoyeds   -1 | pomeranians    1 | akitas   -1 | vizslas    2 | goldfish   -1 | trees   -1 | cars   -1 | perfumes    7 
- * LIST Number 497        | children   -1 | cats   -1 | samoyeds   -1 | pomeranians   -1 | akitas    4 | vizslas    6 | goldfish   -1 | trees    2 | cars   -1 | perfumes   -1 
- * LIST Number 498        | children   -1 | cats   -1 | samoyeds   -1 | pomeranians    7 | akitas    8 | vizslas   -1 | goldfish   -1 | trees    0 | cars   -1 | perfumes   -1 
- * LIST Number 499        | children   -1 | cats   -1 | samoyeds   -1 | pomeranians   -1 | akitas   -1 | vizslas    7 | goldfish    3 | trees   -1 | cars   -1 | perfumes    6 
- * LIST Number 500        | children   -1 | cats   -1 | samoyeds   -1 | pomeranians   -1 | akitas   -1 | vizslas    1 | goldfish   -1 | trees   -1 | cars    1 | perfumes    6 
+ * https://github.com/ea234/Advent_of_Code_2015/blob/main/src/de/ea234/aoc2015/day16/Day16_AuntSue.java
  * 
  * 
- * OK Number 213        | children    3 | cats   -1 | samoyeds   -1 | pomeranians   -1 | akitas   -1 | vizslas    0 | goldfish    5 | trees   -1 | cars   -1 | perfumes   -1 
- * S0 Number 0          | children    3 | cats    7 | samoyeds    2 | pomeranians    3 | akitas    0 | vizslas    0 | goldfish    5 | trees    3 | cars    2 | perfumes    1 
+ * Aunt Sue Part 0 Number 0    | children  3 | cats  7 | samoyeds  2 | pomeranians  3 | akitas  0 | vizslas  0 | goldfish  5 | trees  3 | cars  2 | perfumes  1 
+ * 
+ * Aunt Sue Part 1 Number 0    | children  3 | cats  7 | samoyeds  2 | pomeranians  3 | akitas  0 | vizslas  0 | goldfish  5 | trees  3 | cars  2 | perfumes  1 
+ * Aunt Sue Part 2 Number 0    | children  3 | cats  7 | samoyeds  2 | pomeranians  3 | akitas  0 | vizslas  0 | goldfish  5 | trees  3 | cars  2 | perfumes  1 
+ * 
+ * Result Part 1 213
+ * Result Part 2 323
  * 
  * </pre>
  */
 public class Day16_AuntSue
 {
+  private static int STATUS_OK         =  1;
+
+  private static int STATUS_NEGATIVE   =  2;
+
+  private static int NOT_PRESENT       = -1;
+
   public static void main( String[] args )
   {
     calculate01( getListProd(), "Sue 0: children: 3,cats: 7,samoyeds: 2,pomeranians: 3,akitas: 0,vizslas: 0,goldfish: 5,trees: 3,cars: 2,perfumes: 1" );
@@ -45,17 +47,15 @@ public class Day16_AuntSue
 
   private static void calculate01( List< String > pListInput, String pAuntSue0 )
   {
-    wl( "" );
-    wl( "---- Knz Do Red Check ----------------------------------------------------------" );
-    wl( "" );
-
     List< AuntSue > list_aunt_sue = new ArrayList< Day16_AuntSue.AuntSue >();
 
+    /*
+     * *******************************************************************************************************
+     * Creating a "Aunt Sue" list from the input
+     * *******************************************************************************************************
+     */
+    
     AuntSue aunt_sue_0 = new AuntSue( pAuntSue0 );
-
-    int result_part_01 = 0;
-
-    int result_part_02 = 0;
 
     for ( String input_str : pListInput )
     {
@@ -65,37 +65,53 @@ public class Day16_AuntSue
       }
     }
 
-    wl( "" );
+    /*
+     * *******************************************************************************************************
+     * Check for invalidating the invalid Aunt Sue's
+     * *******************************************************************************************************
+     */
+
     wl( "" );
 
-    for ( AuntSue xkl : list_aunt_sue )
+    for ( AuntSue cur_aunt_sue : list_aunt_sue )
     {
-      wl( "LIST " + xkl.toString() );
+      cur_aunt_sue.checkNegativePart01( aunt_sue_0 );
 
-      if ( xkl.checkNegative( aunt_sue_0 ) == STATUS_OK )
+      cur_aunt_sue.checkNegativePart02( aunt_sue_0 );
+    }
+
+    /*
+     * *******************************************************************************************************
+     * Creating Results
+     * *******************************************************************************************************
+     */
+
+    String result_part_01 = "---";
+    String result_part_02 = "---";
+    
+    wl( "" );
+    wl( "Aunt Sue Part 0 " + aunt_sue_0.toString() );
+    wl( "" );
+
+    for ( AuntSue cur_aunt_sue : list_aunt_sue )
+    {
+      if ( cur_aunt_sue.isPart1StatusOK() )
       {
-        result_part_01++;
-      }
-      else
-      {
-        result_part_01++;
+        wl( "Aunt Sue Part 1 " + aunt_sue_0.toString() );
+        
+        result_part_01 = cur_aunt_sue.getNumber();
       }
     }
 
-    wl( "" );
-    wl( "" );
-    wl( "" );
-    wl( "" );
-
-    for ( AuntSue xkl : list_aunt_sue )
+    for ( AuntSue cur_aunt_sue : list_aunt_sue )
     {
-      if ( xkl.isStatusOK() )
+      if ( cur_aunt_sue.isPart2StatusOK() )
       {
-        wl( "OK " + xkl.toString() );
+        wl( "Aunt Sue Part 2 " + aunt_sue_0.toString() );
+        
+        result_part_02 = cur_aunt_sue.getNumber();
       }
     }
-
-    wl( "S0 " + aunt_sue_0.toString() );
 
     wl( "" );
     wl( "Result Part 1 " + result_part_01 );
@@ -104,229 +120,144 @@ public class Day16_AuntSue
     wl( "" );
   }
 
-  private static long getSumNumbersRegExMatcher( String pString )
-  {
-    long sum_numbers = 0;
-
-    Pattern pattern = Pattern.compile( "-?\\d+" );
-
-    Matcher matcher = pattern.matcher( pString );
-
-    int number_nr = 0;
-
-    while ( matcher.find() )
-    {
-      number_nr++;
-
-      sum_numbers += Long.parseLong( matcher.group() );
-
-      wl( String.format( "RegEx   Nr %5d   Value %6s   Sum %10d", number_nr, matcher.group(), sum_numbers ) );
-    }
-
-    return sum_numbers;
-  }
-
   private static String[] splitAtIndex( String pString, int pIndex )
   {
     return new String[] { pString.substring( 0, pIndex ), pString.substring( pIndex ) };
   }
 
-  private static int STATUS_OK         = 1;
-
-  private static int STATUS_NEGATIVE_1 = 2;
-
-  private static int NOT_THERE         = -1;
-
   private static class AuntSue
   {
-    String         number             = "XXX";
+    String      m_number      = "XXX";
 
-    private int    m_status           = STATUS_OK;
+    private int m_status_01   = STATUS_OK;
 
-    private int    m_children         = NOT_THERE;
+    private int m_status_02   = STATUS_OK;
 
-    private int    m_cats             = NOT_THERE;
+    private int m_children    = NOT_PRESENT;
 
-    private int    m_samoyeds         = NOT_THERE;
+    private int m_cats        = NOT_PRESENT;
 
-    private int    m_pomeranians      = NOT_THERE;
+    private int m_samoyeds    = NOT_PRESENT;
 
-    private int    m_akitas           = NOT_THERE;
+    private int m_pomeranians = NOT_PRESENT;
 
-    private int    m_vizslas          = NOT_THERE;
+    private int m_akitas      = NOT_PRESENT;
 
-    private int    m_goldfish         = NOT_THERE;
+    private int m_vizslas     = NOT_PRESENT;
 
-    private int    m_trees            = NOT_THERE;
+    private int m_goldfish    = NOT_PRESENT;
 
-    private int    m_cars             = NOT_THERE;
+    private int m_trees       = NOT_PRESENT;
 
-    private int    m_perfumes         = NOT_THERE;
+    private int m_cars        = NOT_PRESENT;
 
-    private String negative_compounds = "";
+    private int m_perfumes    = NOT_PRESENT;
 
     public AuntSue( String pString )
     {
+      /*
+       * Search the first delimiter 
+       * 
+       * Sue 268: akitas: 10, vizslas: 3, cats: 2
+       */
       int index_first_delimiter = pString.indexOf( ':' );
 
-      String[] result = splitAtIndex( pString, index_first_delimiter );
+      /*
+       * Split the input string, to get the list number
+       */
+      String[] string_parts_1 = splitAtIndex( pString, index_first_delimiter );
 
-      number = result[ 0 ].substring( 4 );
+      m_number = string_parts_1[ 0 ].substring( 4 );
 
-      List< String > converted_string_list = Arrays.stream( result[ 1 ].replaceAll( "\\s+", "" ).substring( 1 ).split( "," ) ).map( String::trim ).collect( Collectors.toList() );
+      /*
+       * Split the second half to get the items-list 
+       */
+      List< String > converted_string_list = Arrays.stream( string_parts_1[ 1 ].replaceAll( "\\s+", "" ).substring( 1 ).split( "," ) ).map( String::trim ).collect( Collectors.toList() );
 
       for ( String entry : converted_string_list )
       {
-        String[] parts = entry.split( ":" );
+        String[] string_key_value = entry.split( ":" );
 
-        String key1 = parts[ 0 ];
+        String key_name = string_key_value[ 0 ];
 
-        int value = Integer.parseInt( parts[ 1 ] );
+        int value = Integer.parseInt( string_key_value[ 1 ] );
 
-        switch ( key1 )
+        switch ( key_name )
         {
-          case "children" :
-            m_children = value;
-            break;
+          case "children"    : m_children    = value; break;
+          case "cats"        : m_cats        = value; break;
+          case "samoyeds"    : m_samoyeds    = value; break;
+          case "pomeranians" : m_pomeranians = value; break;
+          case "akitas"      : m_akitas      = value; break;
+          case "vizslas"     : m_vizslas     = value; break;
+          case "goldfish"    : m_goldfish    = value; break;
+          case "trees"       : m_trees       = value; break;
+          case "cars"        : m_cars        = value; break;
+          case "perfumes"    : m_perfumes    = value; break;
 
-          case "cats" :
-            m_cats = value;
-            break;
-
-          case "samoyeds" :
-            m_samoyeds = value;
-            break;
-
-          case "pomeranians" :
-            m_pomeranians = value;
-            break;
-
-          case "akitas" :
-            m_akitas = value;
-            break;
-
-          case "vizslas" :
-            m_vizslas = value;
-            break;
-
-          case "goldfish" :
-            m_goldfish = value;
-            break;
-
-          case "trees" :
-            m_trees = value;
-            break;
-
-          case "cars" :
-            m_cars = value;
-            break;
-
-          case "perfumes" :
-            m_perfumes = value;
+          default :
+            System.out.println( "not known " + key_name );
             break;
         }
       }
     }
-
-    public boolean isStatusOK()
+    
+    public void checkNegativePart01( AuntSue pAuntSue0 )
     {
-      return m_status == STATUS_OK;
+      if ( m_children    != NOT_PRESENT ) { if ( m_children    != pAuntSue0.getChildren()    ) { m_status_01 = STATUS_NEGATIVE; } }
+      if ( m_cats        != NOT_PRESENT ) { if ( m_cats        != pAuntSue0.getCats()        ) { m_status_01 = STATUS_NEGATIVE; } }
+      if ( m_samoyeds    != NOT_PRESENT ) { if ( m_samoyeds    != pAuntSue0.getSamoyeds()    ) { m_status_01 = STATUS_NEGATIVE; } }
+      if ( m_pomeranians != NOT_PRESENT ) { if ( m_pomeranians != pAuntSue0.getPomeranians() ) { m_status_01 = STATUS_NEGATIVE; } }
+      if ( m_akitas      != NOT_PRESENT ) { if ( m_akitas      != pAuntSue0.getAkitas()      ) { m_status_01 = STATUS_NEGATIVE; } }
+      if ( m_vizslas     != NOT_PRESENT ) { if ( m_vizslas     != pAuntSue0.getVizslas()     ) { m_status_01 = STATUS_NEGATIVE; } }
+      if ( m_goldfish    != NOT_PRESENT ) { if ( m_goldfish    != pAuntSue0.getGoldfish()    ) { m_status_01 = STATUS_NEGATIVE; } }
+      if ( m_trees       != NOT_PRESENT ) { if ( m_trees       != pAuntSue0.getTrees()       ) { m_status_01 = STATUS_NEGATIVE; } }
+      if ( m_cars        != NOT_PRESENT ) { if ( m_cars        != pAuntSue0.getCars()        ) { m_status_01 = STATUS_NEGATIVE; } }
+      if ( m_perfumes    != NOT_PRESENT ) { if ( m_perfumes    != pAuntSue0.getPerfumes()    ) { m_status_01 = STATUS_NEGATIVE; } }      
+      if ( m_children    != NOT_PRESENT ) { if ( m_children    != pAuntSue0.getChildren()    ) { m_status_01 = STATUS_NEGATIVE; } }
     }
 
-    public int checkNegative( AuntSue pAuntSue0 )
+    public void checkNegativePart02( AuntSue pAuntSue0 )
     {
+      if ( m_children    != NOT_PRESENT ) { if ( m_children != pAuntSue0.getChildren()       ) { m_status_02 = STATUS_NEGATIVE; } }
+      if ( m_samoyeds    != NOT_PRESENT ) { if ( m_samoyeds != pAuntSue0.getSamoyeds()       ) { m_status_02 = STATUS_NEGATIVE; } }
+      if ( m_akitas      != NOT_PRESENT ) { if ( m_akitas   != pAuntSue0.getAkitas()         ) { m_status_02 = STATUS_NEGATIVE; } }
+      if ( m_vizslas     != NOT_PRESENT ) { if ( m_vizslas  != pAuntSue0.getVizslas()        ) { m_status_02 = STATUS_NEGATIVE; } }
+      if ( m_cars        != NOT_PRESENT ) { if ( m_cars     != pAuntSue0.getCars()           ) { m_status_02 = STATUS_NEGATIVE; } }
+      if ( m_perfumes    != NOT_PRESENT ) { if ( m_perfumes != pAuntSue0.getPerfumes()       ) { m_status_02 = STATUS_NEGATIVE; } }
 
-      if ( m_children > 0 )
-      {
-        if ( this.m_children != pAuntSue0.getChildren() )
-        {
-          this.m_status = STATUS_NEGATIVE_1;
-          negative_compounds += "children, ";
-        }
-      }
+      /*
+       * cats and trees = there are greater than that many
+       *
+       * negative less or equal
+       */
 
-      if ( m_cats > 0 )
-      {
-        if ( this.m_cats != pAuntSue0.getCats() )
-        {
-          this.m_status = STATUS_NEGATIVE_1;
-          negative_compounds += "cats    , ";
-        }
-      }
+      if ( m_trees       != NOT_PRESENT ) { if ( m_trees <= pAuntSue0.getTrees()             ) { m_status_02 = STATUS_NEGATIVE; } }
+      if ( m_cats        != NOT_PRESENT ) { if ( m_cats  <= pAuntSue0.getCats()              ) { m_status_02 = STATUS_NEGATIVE; } }
 
-      if ( m_samoyeds > 0 )
-      {
-        if ( this.m_samoyeds != pAuntSue0.getSamoyeds() )
-        {
-          this.m_status = STATUS_NEGATIVE_1;
-          negative_compounds += "samoyeds, ";
-        }
-      }
+      /*
+       * pomeranians and goldfish = that there are fewer than that many
+       *
+       * negative greater or equal
+       */
 
-      if ( m_pomeranians > 0 )
-      {
-        if ( this.m_pomeranians != pAuntSue0.getPomeranians() )
-        {
-          this.m_status = STATUS_NEGATIVE_1;
-          negative_compounds += "pomeranians, ";
-        }
-      }
+      if ( m_pomeranians != NOT_PRESENT ) { if ( m_pomeranians >= pAuntSue0.getPomeranians() ) { m_status_02 = STATUS_NEGATIVE; } }
+      if ( m_goldfish    != NOT_PRESENT ) { if ( m_goldfish >= pAuntSue0.getGoldfish()       ) { m_status_02 = STATUS_NEGATIVE; } }
+    }
 
-      if ( m_akitas > 0 )
-      {
-        if ( this.m_akitas != pAuntSue0.getAkitas() )
-        {
-          this.m_status = STATUS_NEGATIVE_1;
-          negative_compounds += "akitas  , ";
-        }
-      }
+    public String getNumber() 
+    {
+      return m_number;
+    }
 
-      if ( m_vizslas > 0 )
-      {
-        if ( this.m_vizslas != pAuntSue0.getVizslas() )
-        {
-          this.m_status = STATUS_NEGATIVE_1;
-          negative_compounds += "vizslas , ";
-        }
-      }
+    public boolean isPart1StatusOK()
+    {
+      return m_status_01 == STATUS_OK;
+    }
 
-      if ( m_goldfish > 0 )
-      {
-        if ( this.m_goldfish != pAuntSue0.getGoldfish() )
-        {
-          this.m_status = STATUS_NEGATIVE_1;
-          negative_compounds += "goldfish, ";
-        }
-      }
-
-      if ( m_trees > 0 )
-      {
-        if ( this.m_trees != pAuntSue0.getTrees() )
-        {
-          this.m_status = STATUS_NEGATIVE_1;
-          negative_compounds += "trees   , ";
-        }
-      }
-
-      if ( m_cars > 0 )
-      {
-        if ( this.m_cars != pAuntSue0.getCars() )
-        {
-          this.m_status = STATUS_NEGATIVE_1;
-          negative_compounds += "cars    , ";
-        }
-      }
-
-      if ( m_perfumes > 0 )
-      {
-        if ( this.m_perfumes != pAuntSue0.getPerfumes() )
-        {
-          this.m_status = STATUS_NEGATIVE_1;
-          negative_compounds += "perfumes, ";
-        }
-      }
-
-      return this.m_status;
+    public boolean isPart2StatusOK()
+    {
+      return m_status_02 == STATUS_OK;
     }
 
     public int getChildren()
@@ -381,9 +312,8 @@ public class Day16_AuntSue
 
     public String toString()
     {
-      return String.format( "Number %-10s | children %4d | cats %4d | samoyeds %4d | pomeranians %4d | akitas %4d | vizslas %4d | goldfish %4d | trees %4d | cars %4d | perfumes %4d ", number, m_children, m_cats, m_samoyeds, m_pomeranians, m_akitas, m_vizslas, m_goldfish, m_trees, m_cars, m_perfumes );
+      return String.format( "Number %-4s | children %2d | cats %2d | samoyeds %2d | pomeranians %2d | akitas %2d | vizslas %2d | goldfish %2d | trees %2d | cars %2d | perfumes %2d ", m_number, m_children, m_cats, m_samoyeds, m_pomeranians, m_akitas, m_vizslas, m_goldfish, m_trees, m_cars, m_perfumes );
     }
-
   }
 
   private static List< String > getListProd()
@@ -408,5 +338,5 @@ public class Day16_AuntSue
   {
     System.out.println( pString );
   }
-
 }
+
